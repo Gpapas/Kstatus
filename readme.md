@@ -22,4 +22,8 @@ python -m src.main --by title        # group notes alphabetically by title
 python -m src.main --by date --date-key modified   # group by modified date
 ```
 
-The command prints categorized notes in JSON format.
+The command prints categorized notes in JSON format by default. Use `--output PATH`
+to write the JSON to a file instead.
+
+If the tool fails to retrieve notes from the Bear API, it prints `failed to fetch
+notes` and exits with a non-zero status code.
