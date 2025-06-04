@@ -1,6 +1,8 @@
 """Command line interface for organizing Bear notes."""
 import argparse
 import json
+import sys
+import requests
 from .bear_api import BearAPI
 from .organizer import (
     categorize_by_tag,
@@ -20,10 +22,18 @@ def main() -> None:
     parser.add_argument(
         "--date-key", default="created", help="Date field to use when --by date"
     )
+    parser.add_argument(
+        "--output",
+        help="Path to file where JSON output will be written",
+    )
     args = parser.parse_args()
 
     api = BearAPI()
-    notes = api.get_notes()
+    try:
+        notes = api.get_notes()
+    except requests.exceptions.HTTPError:
+        print("failed to fetch notes")
+        sys.exit(1)
 
     if args.by == "tag":
         categories = categorize_by_tag(notes)
@@ -32,7 +42,12 @@ def main() -> None:
     else:
         categories = categorize_by_date(notes, date_key=args.date_key)
 
-    print(json.dumps(categories, indent=2))
+    result_json = json.dumps(categories, indent=2)
+    if args.output:
+        with open(args.output, "w") as f:
+            f.write(result_json)
+    else:
+        print(result_json)
 
 
 if __name__ == "__main__":
